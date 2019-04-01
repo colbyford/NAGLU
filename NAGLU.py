@@ -82,9 +82,13 @@ dataset = pipelineModel.transform(dataset)
 
 display(dataset)
 
+
+# COMMAND ----------
+
+
 ## Save Transformation Pipeline
-# pipelineModel.save("/mnt/trainedmodels/pipeline")
-# display(dbutils.fs.ls("/mnt/trainedmodels/pipeline"))
+pipelineModel.save("/mnt/general/trainedmodels/NAGLU/pipeline")
+display(dbutils.fs.ls("/mnt/general/trainedmodels/NAGLU/pipeline"))
 
 ## Read in Transformation Pipeline
 # from pyspark.ml import PipelineModel
@@ -287,6 +291,19 @@ allpredictions = lrpredictions.withColumnRenamed("prediction", "lr_prediction") 
                               .join(dtpredictions.withColumnRenamed("prediction", "dt_prediction"), ["variant_position", "AA_substitution", "pph2_prob", "features"])
 
 display(allpredictions)
+
+# COMMAND ----------
+
+display(dbutils.fs.ls("/mnt/"))
+
+# COMMAND ----------
+
+## Write Model to Blob
+lrcvModel.save("/mnt/general/trainedmodels/NAGLU/lr")
+rfcvModel.save("/mnt/general/trainedmodels/NAGLU/rf")
+gtcvModel.save("/mnt/general/trainedmodels/NAGLU/gt")
+dtcvModel.save("/mnt/general/trainedmodels/NAGLU/dt")
+display(dbutils.fs.ls("/mnt/general/trainedmodels/NAGLU"))
 
 # COMMAND ----------
 
