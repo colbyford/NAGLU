@@ -1,4 +1,10 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC ## Prediction of the Effect of N-Acetyl Glucosaminidase Enzymatic Activity
+# MAGIC <h4 align="left">Colby T. Ford, Ph.D., Conor M. Nodzak, Ph.D., Aneeta Uppal, M.S.</h4>
+
+# COMMAND ----------
+
 # MAGIC %sql
 # MAGIC SELECT *
 # MAGIC FROM naglu_data
@@ -15,7 +21,7 @@ dataset = spark.table("naglu_data").select(col("allele1"),
                                         col("cDNA_nucleotide_change"),
                                         col("AA_reference"),
                                         col("allele2"),
-                                        col("prediction"),
+                                        col("prediction").alias("prediction_category"),
                                         col("pph2_class"),
                                         col("pph2_prob"),
                                         col("pph2_FPR"),
@@ -39,7 +45,7 @@ categoricalColumns = ["allele1",
                       "AA_substitution",
                       "cDNA_nucleotide_change",
                       "AA_reference",
-                      "prediction",
+                      "prediction_category",
                       "pph2_class"]
 
 numericalColumns = ["pph2_FPR",
@@ -115,7 +121,8 @@ dataset.printSchema()
 train = dataset
 test = dataset
 
-display(train)
+print("Train: ", train.count())
+#display(train)
 
 # COMMAND ----------
 
@@ -307,3 +314,37 @@ display(dbutils.fs.ls("/mnt/general/trainedmodels/NAGLU"))
 
 # COMMAND ----------
 
+# DBTITLE 1,Scorer
+from pyspark.sql import *
+from pyspark.sql.functions import col
+
+## Load in data from NAGLU table
+dataset = spark.table("naglu_data").select(col("allele1"),
+                                        col("chromosome"),
+                                        col("variant_position"),
+                                        col("AA_substitution"),
+                                        col("cDNA_nucleotide_change"),
+                                        col("AA_reference"),
+                                        col("allele2"),
+                                        col("prediction").alias("prediction_category"),
+                                        col("pph2_class"),
+                                        col("pph2_prob"),
+                                        col("pph2_FPR"),
+                                        col("pph2_TPR"),
+                                        col("pph2_FDR"),
+                                        col("allele3"))
+
+## Read in Transformation Pipeline
+from pyspark.ml import PipelineModel
+pipelineModel = PipelineModel.load("/mnt/general/trainedmodels/NAGLU/pipeline")
+dataset = pipelineModel.transform(dataset)
+#display(dataset)
+
+## Load Trained Model and Transform Dataset
+from pyspark.ml.tuning import CrossValidatorModel
+## Score the data using the model
+lrcvModel = CrossValidatorModel.load("/mnt/general/trainedmodels/NAGLU/lr/")
+output = lrcvModel.bestModel.transform(dataset)
+
+output.count()
+#display(output)
