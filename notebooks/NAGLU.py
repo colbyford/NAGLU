@@ -11,11 +11,15 @@
 
 # COMMAND ----------
 
+## Clear mounted storage
+# dbutils.fs.rm("/mnt/general/trainedmodels/NAGLU/", True)
+
+# COMMAND ----------
+
 from pyspark.sql import *
 from pyspark.sql.functions import col
 
 dataset = spark.table("naglu_data").select(col("allele1"),
-                                        col("chromosome"),
                                         col("variant_position"),
                                         col("AA_substitution"),
                                         col("cDNA_nucleotide_change"),
@@ -23,11 +27,23 @@ dataset = spark.table("naglu_data").select(col("allele1"),
                                         col("allele2"),
                                         col("prediction").alias("prediction_category"),
                                         col("pph2_class"),
-                                        col("pph2_prob"),
+                                        col("pph2_prob_rev").alias("ea_prob"),
                                         col("pph2_FPR"),
                                         col("pph2_TPR"),
-                                        col("pph2_FDR"),
-                                        col("allele3"))
+                                        col("pph2_FDR"))
+
+test = spark.table("naglu_data").select(col("allele1"),
+                                        col("variant_position"),
+                                        col("AA_substitution"),
+                                        col("cDNA_nucleotide_change"),
+                                        col("AA_reference"),
+                                        col("allele2"),
+                                        col("prediction").alias("prediction_category"),
+                                        col("pph2_class"),
+                                        col("enzymaticactivity_actual").alias("ea_prob"),
+                                        col("pph2_FPR"),
+                                        col("pph2_TPR"),
+                                        col("pph2_FDR"))
 
 display(dataset)
 
@@ -36,7 +52,7 @@ display(dataset)
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import OneHotEncoder, OneHotEncoderEstimator, StringIndexer, VectorAssembler
 
-label = "pph2_prob"
+label = "ea_prob"
 categoricalColumns = ["allele1",
                       "allele2",
                       #"allele3",
@@ -84,9 +100,9 @@ stages += [assembler]
 
 prepPipeline = Pipeline().setStages(stages)
 pipelineModel = prepPipeline.fit(dataset)
-dataset = pipelineModel.transform(dataset)
+#dataset = pipelineModel.transform(dataset)
 
-display(dataset)
+#display(dataset)
 
 
 # COMMAND ----------
@@ -105,9 +121,9 @@ display(dbutils.fs.ls("/mnt/general/trainedmodels/NAGLU/pipeline"))
 # COMMAND ----------
 
 # Keep relevant columns
-cols = ["variant_position", "AA_substitution", "pph2_prob"]
+cols = ["variant_position", "AA_substitution", "ea_prob"]
 selectedcols = ["features"] + cols
-dataset = dataset.select(selectedcols)
+#dataset = dataset.select(selectedcols)
 dataset.printSchema()
 
 # COMMAND ----------
@@ -118,8 +134,8 @@ dataset.printSchema()
 # print("Test: ", test.count())
 
 ## Use full dataset to train
-train = dataset
-test = dataset
+train = pipelineModel.transform(dataset).select(selectedcols)
+test = pipelineModel.transform(test).select(selectedcols)
 
 print("Train: ", train.count())
 #display(train)
@@ -134,7 +150,7 @@ from pyspark.mllib.evaluation import BinaryClassificationMetrics
 #from mmlspark import ComputeModelStatistics
 
 # Create initial LinearRegression model
-lr = LinearRegression(labelCol="pph2_prob", featuresCol="features")
+lr = LinearRegression(labelCol="ea_prob", featuresCol="features")
 
 
 # Create ParamGrid for Cross Validation
@@ -145,7 +161,7 @@ lrparamGrid = (ParamGridBuilder()
              .build())
 
 # Evaluate model
-lrevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="pph2_prob", metricName="rmse")
+lrevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="ea_prob", metricName="rmse")
 
 # Create 5-fold CrossValidator
 lrcv = CrossValidator(estimator = lr,
@@ -164,10 +180,11 @@ lrcvSummary = lrcvModel.bestModel.summary
 
 # Use test set here so we can measure the accuracy of our model on new data
 lrpredictions = lrcvModel.transform(test)
+display(lrpredictions)
 
 # cvModel uses the best model found from the Cross Validation
 # Evaluate best model
-print('RMSE:', lrevaluator.evaluate(lrpredictions))
+#print('RMSE:', lrevaluator.evaluate(lrpredictions))
 
 # COMMAND ----------
 
@@ -177,10 +194,10 @@ from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
 from pyspark.ml.evaluation import RegressionEvaluator
 
 # Create an initial RandomForest model.
-rf = RandomForestRegressor(labelCol="pph2_prob", featuresCol="features")
+rf = RandomForestRegressor(labelCol="ea_prob", featuresCol="features")
 
 # Evaluate model
-rfevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="pph2_prob", metricName="rmse")
+rfevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="ea_prob", metricName="rmse")
 
 # Create ParamGrid for Cross Validation
 rfparamGrid = (ParamGridBuilder()
@@ -201,10 +218,11 @@ print(rfcvModel)
 
 # Use test set here so we can measure the accuracy of our model on new data
 rfpredictions = rfcvModel.transform(test)
+display(rfpredictions)
 
 # cvModel uses the best model found from the Cross Validation
 # Evaluate best model
-print('RMSE:', rfevaluator.evaluate(rfpredictions))
+#print('RMSE:', rfevaluator.evaluate(rfpredictions))
 
 # COMMAND ----------
 
@@ -214,7 +232,7 @@ from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
 from pyspark.ml.evaluation import RegressionEvaluator
 
 # Create initial Decision Tree Model
-gt = GBTRegressor(labelCol="pph2_prob", featuresCol="features")
+gt = GBTRegressor(labelCol="ea_prob", featuresCol="features")
 
 # Create ParamGrid for Cross Validation
 gtparamGrid = (ParamGridBuilder()
@@ -225,7 +243,7 @@ gtparamGrid = (ParamGridBuilder()
              .build())
 
 # Evaluate model
-gtevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="pph2_prob", metricName="rmse")
+gtevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="ea_prob", metricName="rmse")
 
 # Create 5-fold CrossValidator
 gtcv = CrossValidator(estimator = gt,
@@ -239,10 +257,12 @@ print(gtcvModel)
 
 # Use test set here so we can measure the accuracy of our model on new data
 gtpredictions = gtcvModel.transform(test)
+display(gtpredictions)
+
 
 # cvModel uses the best model found from the Cross Validation
 # Evaluate best model
-print('RMSE:', gtevaluator.evaluate(gtpredictions))
+#print('RMSE:', gtevaluator.evaluate(gtpredictions))
 
 # COMMAND ----------
 
@@ -252,7 +272,7 @@ from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
 from pyspark.ml.evaluation import RegressionEvaluator
 
 # Create initial Decision Tree Model
-dt = DecisionTreeRegressor(labelCol="pph2_prob", featuresCol="features")
+dt = DecisionTreeRegressor(labelCol="ea_prob", featuresCol="features")
 
 # Create ParamGrid for Cross Validation
 dtparamGrid = (ParamGridBuilder()
@@ -263,7 +283,7 @@ dtparamGrid = (ParamGridBuilder()
              .build())
 
 # Evaluate model
-dtevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="pph2_prob", metricName="rmse")
+dtevaluator = RegressionEvaluator(predictionCol="prediction", labelCol="ea_prob", metricName="rmse")
 
 # Create 5-fold CrossValidator
 dtcv = CrossValidator(estimator = dt,
@@ -277,25 +297,26 @@ print(dtcvModel)
 
 # Use test set here so we can measure the accuracy of our model on new data
 dtpredictions = dtcvModel.transform(test)
+display(dtpredictions)
 
 # cvModel uses the best model found from the Cross Validation
 # Evaluate best model
-print('RMSE:', dtevaluator.evaluate(dtpredictions))
+#print('RMSE:', dtevaluator.evaluate(dtpredictions))
 
 # COMMAND ----------
 
 # DBTITLE 1,Evaluate Models
-print('Linear Regression RMSE:', lrevaluator.evaluate(lrpredictions))
-print('Random Forest RMSE:', rfevaluator.evaluate(rfpredictions))
-print('Gradient Boosted Tree RMSE:', gtevaluator.evaluate(gtpredictions))
-print('Decision Tree RMSE:', dtevaluator.evaluate(dtpredictions))
+# print('Linear Regression RMSE:', lrevaluator.evaluate(lrpredictions))
+# print('Random Forest RMSE:', rfevaluator.evaluate(rfpredictions))
+# print('Gradient Boosted Tree RMSE:', gtevaluator.evaluate(gtpredictions))
+# print('Decision Tree RMSE:', dtevaluator.evaluate(dtpredictions))
 
 # COMMAND ----------
 
 allpredictions = lrpredictions.withColumnRenamed("prediction", "lr_prediction") \
-                              .join(rfpredictions.withColumnRenamed("prediction", "rf_prediction"), ["variant_position", "AA_substitution", "pph2_prob", "features"]) \
-                              .join(gtpredictions.withColumnRenamed("prediction", "gt_prediction"), ["variant_position", "AA_substitution", "pph2_prob", "features"]) \
-                              .join(dtpredictions.withColumnRenamed("prediction", "dt_prediction"), ["variant_position", "AA_substitution", "pph2_prob", "features"])
+                              .join(rfpredictions.withColumnRenamed("prediction", "rf_prediction"), ["variant_position", "AA_substitution", "ea_prob", "features"]) \
+                              .join(gtpredictions.withColumnRenamed("prediction", "gt_prediction"), ["variant_position", "AA_substitution", "ea_prob", "features"]) \
+                              .join(dtpredictions.withColumnRenamed("prediction", "dt_prediction"), ["variant_position", "AA_substitution", "ea_prob", "features"])
 
 display(allpredictions)
 
@@ -328,7 +349,7 @@ dataset = spark.table("naglu_data").select(col("allele1"),
                                         col("allele2"),
                                         col("prediction").alias("prediction_category"),
                                         col("pph2_class"),
-                                        col("pph2_prob"),
+                                        col("pph2_prob_rev").alias("ea_prob"),
                                         col("pph2_FPR"),
                                         col("pph2_TPR"),
                                         col("pph2_FDR"),
