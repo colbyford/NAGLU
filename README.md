@@ -13,7 +13,6 @@ Once the probability scores were generated, the dataset was then run through mul
 
 ## How to Cite
 
-
 ```
 Prediction of the Effect of Naturally Occurring Missense Mutations on Cellular N-Acetyl-Glucosaminidase Enzymatic Activity
 Colby T Ford, Conor M Nodzak, Aneeta Uppal, Xinghua Shi
@@ -21,7 +20,8 @@ bioRxiv 598870; doi: https://doi.org/10.1101/598870
 ```
 
 ### BibTex:
-```
+
+```latex
 @article {NAGLU,
 	author = {Ford, Colby T. and Nodzak, Conor M. and Uppal, Aneeta and Shi, Xinghua},
 	title = {Prediction of the Effect of Naturally Occurring Missense Mutations on Cellular N-Acetyl-Glucosaminidase Enzymatic Activity},
@@ -35,4 +35,42 @@ bioRxiv 598870; doi: https://doi.org/10.1101/598870
 	journal = {bioRxiv}
 }
 
+```
+---------------------------
+
+# Article in _Human Mutation_: Assessment of predicted enzymatic activity of alpha‐N‐acetylglucosaminidase (NAGLU) variants of unknown significance for CAGI 2016
+This work was combined with other researchers for CAGI 2016 and published as a compilation article in _Human Mutation_.
+
+### [View Article in _Human Mutation_.](https://onlinelibrary.wiley.com/doi/pdf/10.1002/humu.23875)
+
+## How to Cite
+
+```latex
+Clark, W. T., Kasak, L. , Bakolitsa, C. , Hu, Z. , Andreoletti, G. ,
+Babbi, G. , Bromberg, Y. , Casadio, R. , Dunbrack, R. , Folkman, L. ,
+Ford, C. T., Jones, D. , Katsonis, P. , Kundu, K. , Lichtarge, O. ,
+Martelli, P. L., Mooney, S. D., Nodzak, C. , Pal, L. R., Radivojac, P. ,
+Savojardo, C. , Shi, X. , Zhou, Y. , Uppal, A. , Xu, Q. , Yin, Y. ,
+Pejaver, V. , Wang, M. , Wei, L. , Moult, J. , Yu, G. K., Brenner, S. E. and LeBowitz, J. H.
+(2019), Assessment of predicted enzymatic activity of alpha‐N‐acetylglucosaminidase (NAGLU)
+variants of unknown significance for CAGI 2016. Human Mutation.
+Accepted Author Manuscript. doi:10.1002/humu.23875
+```
+
+
+### BibTex:
+```latex
+@article{doi:10.1002/humu.23875,
+author = {Clark, Wyatt T. and Kasak, Laura and Bakolitsa, Constantina and Hu, Zhiqiang and Andreoletti, Gaia and Babbi, Giulia and Bromberg, Yana and Casadio, Rita and Dunbrack, Roland and Folkman, Lukas and Ford, Colby T. and Jones, David and Katsonis, Panagiotis and Kundu, Kunal and Lichtarge, Olivier and Martelli, Pier Luigi and Mooney, Sean D. and Nodzak, Conor and Pal, Lipika R. and Radivojac, Predrag and Savojardo, Castrense and Shi, Xinghua and Zhou, Yaoqi and Uppal, Aneeta and Xu, Qifang and Yin, Yizhou and Pejaver, Vikas and Wang, Meng and Wei, Liping and Moult, John and Yu, G. Karen and Brenner, Steven E. and LeBowitz, Jonathan H.},
+title = {Assessment of predicted enzymatic activity of alpha-N-acetylglucosaminidase (NAGLU) variants of unknown significance for CAGI 2016},
+journal = {Human Mutation},
+volume = {},
+number = {},
+pages = {},
+keywords = {alpha-N-acetylglucosaminidase, CAGI, critical assessment, enzymatic activity, machine learning, Sanfilippo syndrome, variants of unknown significance},
+doi = {10.1002/humu.23875},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/humu.23875},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/humu.23875},
+abstract = {Abstract The NAGLU challenge of the fourth edition of the Critical Assessment of Genome Interpretation experiment (CAGI4) in 2016, invited participants to predict the impact of variants of unknown significance (VUS) on the enzymatic activity of the lysosomal hydrolase α-N-acetylglucosaminidase (NAGLU). Deficiencies in NAGLU activity lead to a rare, monogenic, recessive lysosomal storage disorder, Sanfilippo syndrome type B (MPS type IIIB). This challenge attracted 17 submissions from 10 groups. We observed that top models were able to predict the impact of missense mutations on enzymatic activity with Pearson's correlation coefficients of up to 0.61. We also observed that top methods were significantly more correlated with each other than they were with observed enzymatic activity values, which we believe speaks to the importance of sequence conservation across the different methods. Improved functional predictions on the VUS will help population scale analysis of disease epidemiology and rare variant association analysis. This article is protected by copyright. All rights reserved.}
+}
 ```
