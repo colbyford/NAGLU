@@ -63,6 +63,7 @@ Accepted Author Manuscript. doi:10.1002/humu.23875
 @article{doi:10.1002/humu.23875,
 author = {Clark, Wyatt T. and Kasak, Laura and Bakolitsa, Constantina and Hu, Zhiqiang and Andreoletti, Gaia and Babbi, Giulia and Bromberg, Yana and Casadio, Rita and Dunbrack, Roland and Folkman, Lukas and Ford, Colby T. and Jones, David and Katsonis, Panagiotis and Kundu, Kunal and Lichtarge, Olivier and Martelli, Pier Luigi and Mooney, Sean D. and Nodzak, Conor and Pal, Lipika R. and Radivojac, Predrag and Savojardo, Castrense and Shi, Xinghua and Zhou, Yaoqi and Uppal, Aneeta and Xu, Qifang and Yin, Yizhou and Pejaver, Vikas and Wang, Meng and Wei, Liping and Moult, John and Yu, G. Karen and Brenner, Steven E. and LeBowitz, Jonathan H.},
 title = {Assessment of predicted enzymatic activity of alpha-N-acetylglucosaminidase (NAGLU) variants of unknown significance for CAGI 2016},
+year = {2019},
 journal = {Human Mutation},
 volume = {},
 number = {},
